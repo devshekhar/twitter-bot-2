@@ -3,6 +3,7 @@ var express = require('express');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var path = require('path');
+var jade = require('jade');
 var indexRouter = require('./routes/index');
 var twitRouter = require('./routes/twit');
 require('dotenv').config();
@@ -22,9 +23,11 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
- app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/', indexRouter);
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'jade');
+app.get('/',(req,res) =>{
+  res.send('Welcome to twitter bot');
+})
 app.use('/twitts', twitRouter);
 
 // catch 404 and forward to error handler
