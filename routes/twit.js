@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const Twit = require('twit');
 require('dotenv').config();
+const axios = require('axios');
 var followersModel = require('../models/followers');
 var followingModel = require('../models/following');
 var twitModel = require('../models/twitt');
@@ -85,12 +86,11 @@ router.post('/follow',(req,res) =>{
 
 
   // Tweets in every 30 mins and tagging randomly from the following list
-  router.post('/update', (req,res) => {
-        setInterval(async () =>{
+  router.post('/update', async (req,res) => {
+        
             try {
                 let user_timeline_params ={
                     screen_name: req.body.username,
-
                 }
         let following_list = await T.get('friends/list',user_timeline_params);
         following_list_username =[]
@@ -103,18 +103,28 @@ router.post('/follow',(req,res) =>{
             followerslist: following_list_username   
         });
         await following.save();
-        console.log(following_list_username,333)
         let randomuser = following_list_username[Math.floor(Math.random()*following_list_username.length)];
-        console.log(randomuser,33)
         let user_twitt ={
-            status: randomuser 
+            status: `${randomuser},  ${Math.random()}`
         }
          let status_update = await T.post('statuses/update', user_twitt);
-         // res.send(status_update); 
+          res.send(status_update); 
+          console.log(req.originalUrl);
+          setTimeout(()=>{
+            let current_url = req.protocol + '://' + req.get('host') + req.originalUrl;
+            console.log(current_url,444)
+            axios({
+                method: 'post',
+                url: current_url,
+                data: {
+                    "username":req.body.username
+                   }
+              });
+          },1000*60*30)
         } catch(err){
             console.log(err);
         }   
-   },1000*60*30)
+  
      
   })
 
